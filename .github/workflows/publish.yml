@@ -25,12 +25,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.5
-          run_install: false
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -38,9 +32,9 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
-      - name: Ensure npm trusted-publisher baseline
+      - name: Upgrade npm
         run: |
-          npm install --global npm@11.5.1
+          npm install --global npm@latest
           hash -r
           which node
           node --version
@@ -49,6 +43,12 @@ jobs:
 
       - name: Verify npm CLI baseline
         run: node ./scripts/verify-npm-baseline.mjs
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.5
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
