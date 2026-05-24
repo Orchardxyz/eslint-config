@@ -48,8 +48,7 @@ jobs:
           npm --version
 
       - name: Verify npm CLI baseline
-        run: |
-          node -e "const { execSync } = require('node:child_process'); const version = execSync('npm --version', { encoding: 'utf8' }).trim(); const [major, minor, patch] = version.split('.').map(Number); const ok = major > 11 || (major === 11 && (minor > 5 || (minor === 5 && patch >= 1))); if (!ok) { console.error(`npm ${version} is below the required 11.5.1 baseline.`); process.exit(1); } console.log(`Using npm ${version}`);"
+        run: node ./scripts/verify-npm-baseline.mjs
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
