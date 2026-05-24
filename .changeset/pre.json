@@ -1,8 +1,8 @@
 {
   "mode": "pre",
-  "tag": "prelease",
+  "tag": "beta",
   "initialVersions": {
-    "@oryz/eslint-config": "0.1.1"
+    "@oryz/eslint-config": "0.1.2-prelease.0"
   },
   "changesets": [
     "ten-apples-fold"
