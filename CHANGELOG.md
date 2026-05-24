@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 0.1.2-beta.3
+
+### Patch Changes
+
+- [#12](https://github.com/Orchardxyz/eslint-config/pull/12) [`55ad9ee`](https://github.com/Orchardxyz/eslint-config/commit/55ad9ee3610cf2645df8ddf9ad54b7d596b35f0d) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Add explicit provenance publish configuration for the npm release workflow.
+
 ## 0.1.2-beta.2
 
 ### Patch Changes
