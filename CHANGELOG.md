@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 0.1.2-beta.4
+
+### Patch Changes
+
+- [#14](https://github.com/Orchardxyz/eslint-config/pull/14) [`6cd0901`](https://github.com/Orchardxyz/eslint-config/commit/6cd0901229d9ffbfdce219ed8c30d0e22bad73e4) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Run the npm publish workflow from the `main` push created by merging the Changesets release PR so trusted publishing can authenticate with OIDC.
+
 ## 0.1.2-beta.3
 
 ### Patch Changes
