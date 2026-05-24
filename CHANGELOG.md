@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 0.1.1
+
+### Patch Changes
+
+- [#3](https://github.com/Orchardxyz/eslint-config/pull/3) [`3c3b6ed`](https://github.com/Orchardxyz/eslint-config/commit/3c3b6ed6c25d560792d6dc78d3510b361024d74e) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Fix the publish workflow to enforce the required npm CLI baseline before release.
+
 ## 0.1.0
 
 ### Minor Changes
