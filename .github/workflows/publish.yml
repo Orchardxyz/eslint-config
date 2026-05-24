@@ -34,14 +34,22 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
       - name: Ensure npm trusted-publisher baseline
         run: |
           npm install --global npm@11.5.1
+          hash -r
+          which node
+          node --version
+          which npm
           npm --version
+
+      - name: Verify npm CLI baseline
+        run: |
+          node -e "const { execSync } = require('node:child_process'); const version = execSync('npm --version', { encoding: 'utf8' }).trim(); const [major, minor, patch] = version.split('.').map(Number); const ok = major > 11 || (major === 11 && (minor > 5 || (minor === 5 && patch >= 1))); if (!ok) { console.error(`npm ${version} is below the required 11.5.1 baseline.`); process.exit(1); } console.log(`Using npm ${version}`);"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
