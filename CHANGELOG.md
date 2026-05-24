@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 0.1.2-beta.1
+
+### Patch Changes
+
+- [#8](https://github.com/Orchardxyz/eslint-config/pull/8) [`e7f325d`](https://github.com/Orchardxyz/eslint-config/commit/e7f325d73abba3849f9ce044ef0aa5e0da95e310) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Update the publish workflow to upgrade npm to the latest CLI before prerelease publishing.
+
 ## 0.1.2-prelease.0
 
 ### Patch Changes

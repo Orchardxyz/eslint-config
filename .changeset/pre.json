@@ -5,6 +5,7 @@
     "@oryz/eslint-config": "0.1.2-prelease.0"
   },
   "changesets": [
+    "small-schools-laugh",
     "ten-apples-fold"
   ]
 }
