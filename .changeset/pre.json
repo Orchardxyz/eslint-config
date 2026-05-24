@@ -5,6 +5,7 @@
     "@oryz/eslint-config": "0.1.2-prelease.0"
   },
   "changesets": [
+    "fresh-bags-compete",
     "small-schools-laugh",
     "swift-dingos-tickle",
     "ten-apples-fold"
