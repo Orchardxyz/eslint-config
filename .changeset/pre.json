@@ -4,5 +4,7 @@
   "initialVersions": {
     "@oryz/eslint-config": "0.1.1"
   },
-  "changesets": []
+  "changesets": [
+    "ten-apples-fold"
+  ]
 }

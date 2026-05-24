@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 0.1.2-prelease.0
+
+### Patch Changes
+
+- [#5](https://github.com/Orchardxyz/eslint-config/pull/5) [`6f751b7`](https://github.com/Orchardxyz/eslint-config/commit/6f751b724cf3d7fd7c02bea0095ffe5fd22b5e0a) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Fix the publish workflow baseline check so prerelease validation can use the expected npm CLI.
+
 ## 0.1.1
 
 ### Patch Changes
