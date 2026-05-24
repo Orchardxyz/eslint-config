@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 0.1.2-beta.2
+
+### Patch Changes
+
+- [#10](https://github.com/Orchardxyz/eslint-config/pull/10) [`8f4a998`](https://github.com/Orchardxyz/eslint-config/commit/8f4a998f1a3a3f850edd36d4e19f4410ffbfe2ab) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Fix the publish workflow by removing pnpm cache setup before pnpm is installed.
+
 ## 0.1.2-beta.1
 
 ### Patch Changes
