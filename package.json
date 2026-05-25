@@ -1,6 +1,6 @@
 {
   "name": "@oryz/eslint-config",
-  "version": "0.1.2-beta.4",
+  "version": "0.1.2",
   "description": "Personal reusable ESLint flat config for Oryz projects.",
   "type": "module",
   "packageManager": "pnpm@8.15.5",
