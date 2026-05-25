@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 0.1.3
+
+### Patch Changes
+
+- [`5f570b3`](https://github.com/Orchardxyz/eslint-config/commit/5f570b3383b2771d738c6bc577883740fd2340ea) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Fix GitHub Release creation so release notes are extracted for the package version and release titles match the published version.
+
 ## 0.1.2
 
 ### Patch Changes
