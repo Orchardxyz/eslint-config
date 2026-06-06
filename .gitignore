@@ -3,3 +3,4 @@ node_modules
 .corepack
 .npm-cache
 .release-notes.md
+dist

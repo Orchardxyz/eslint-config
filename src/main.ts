@@ -1,24 +1,28 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
-/** @typedef {import("eslint").Linter.Config} FlatConfig */
-/** @typedef {NonNullable<FlatConfig["languageOptions"]>["globals"]} Globals */
+import type {
+  DisableTypeCheckedOptions,
+  FlatConfig,
+  FlatConfigItem,
+  OryzConfig
+} from "./types";
 
-export const typedLanguageOptions = {
+const typedLanguageOptions = {
   parserOptions: {
     projectService: true
   }
-};
+} satisfies NonNullable<FlatConfig["languageOptions"]>;
 
-export const maxLinesRuleOptions = {
+const maxLinesRuleOptions = {
   skipBlankLines: true,
   skipComments: true
-};
+} as const;
 
 const typeCheckedConfigs = tseslint.configs.recommendedTypeChecked.map((config) => ({
   ...config,
   files: ["**/*.ts", "**/*.tsx"]
-}));
+})) as FlatConfig[];
 
 const sharedTypeScriptRules = {
   "@typescript-eslint/consistent-type-imports": [
@@ -62,11 +66,11 @@ const sharedTypeScriptRules = {
     }
   ],
   "no-void": "error"
-};
+} satisfies NonNullable<FlatConfig["rules"]>;
 
-export const base = [js.configs.recommended];
+const base: FlatConfig[] = [js.configs.recommended];
 
-export const typed = [
+const typed: FlatConfig[] = [
   ...typeCheckedConfigs,
   {
     files: ["**/*.ts", "**/*.tsx"],
@@ -75,17 +79,15 @@ export const typed = [
   }
 ];
 
-export const typescript = typed;
+const typescript = typed;
 
-export const recommended = [...base, ...typed];
+const recommended: FlatConfig[] = [...base, ...typed];
 
-/**
- * @param {{ files?: string[], globals?: Globals }} [options]
- * @returns {FlatConfig}
- */
-export const createDisableTypeCheckedConfig = (options = {}) => {
+const createDisableTypeCheckedConfig = (
+  options: DisableTypeCheckedOptions = {}
+): FlatConfig => {
   const { files, globals } = options;
-  const disableTypeCheckedConfig = /** @type {FlatConfig} */ (tseslint.configs.disableTypeChecked);
+  const disableTypeCheckedConfig = tseslint.configs.disableTypeChecked as FlatConfig;
 
   return {
     ...disableTypeCheckedConfig,
@@ -97,4 +99,23 @@ export const createDisableTypeCheckedConfig = (options = {}) => {
   };
 };
 
-export const disableTypeChecked = createDisableTypeCheckedConfig;
+const disableTypeChecked = createDisableTypeCheckedConfig;
+
+const oryz: OryzConfig = Object.assign(
+  (...configs: FlatConfigItem[]): FlatConfig[] => [
+    ...recommended,
+    ...configs.flatMap((config) => (Array.isArray(config) ? config : [config]))
+  ],
+  {
+    typedLanguageOptions,
+    maxLinesRuleOptions,
+    base,
+    typed,
+    typescript,
+    recommended,
+    createDisableTypeCheckedConfig,
+    disableTypeChecked
+  }
+);
+
+export default oryz;
