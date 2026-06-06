@@ -1,3 +1,3 @@
-import { recommended } from "@oryz/eslint-config";
+import oryz from "@oryz/eslint-config";
 
-export default recommended;
+export default oryz();

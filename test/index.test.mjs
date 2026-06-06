@@ -5,38 +5,41 @@ import { fileURLToPath } from "node:url";
 
 import { ESLint } from "eslint";
 
-import {
-  base,
-  createDisableTypeCheckedConfig,
-  disableTypeChecked,
-  maxLinesRuleOptions,
-  recommended,
-  typed,
-  typedLanguageOptions,
-  typescript
-} from "@oryz/eslint-config";
+import oryz from "@oryz/eslint-config";
 
 const fixtureDir = fileURLToPath(new URL("./fixtures/consumer/", import.meta.url));
 const fixtureConfigPath = path.join(fixtureDir, "eslint.config.mjs");
 
 test("exports the expected flat-config building blocks", () => {
-  assert.ok(Array.isArray(base));
-  assert.ok(Array.isArray(typed));
-  assert.equal(typed, typescript);
-  assert.equal(recommended.length, base.length + typed.length);
-  assert.deepEqual(maxLinesRuleOptions, {
+  assert.ok(Array.isArray(oryz.base));
+  assert.ok(Array.isArray(oryz.typed));
+  assert.equal(oryz.typed, oryz.typescript);
+  assert.equal(oryz.recommended.length, oryz.base.length + oryz.typed.length);
+  assert.deepEqual(oryz(), oryz.recommended);
+  assert.deepEqual(oryz.maxLinesRuleOptions, {
     skipBlankLines: true,
     skipComments: true
   });
-  assert.deepEqual(typedLanguageOptions, {
+  assert.deepEqual(oryz.typedLanguageOptions, {
     parserOptions: {
       projectService: true
     }
   });
 });
 
+test("oryz appends extra configs after the default preset", () => {
+  const extraConfig = /** @type {import("eslint").Linter.Config} */ ({
+    rules: {
+      "no-alert": "error"
+    }
+  });
+
+  assert.deepEqual(oryz(extraConfig), [...oryz.recommended, extraConfig]);
+  assert.deepEqual(oryz([extraConfig]), [...oryz.recommended, extraConfig]);
+});
+
 test("createDisableTypeCheckedConfig merges files and globals", () => {
-  const config = createDisableTypeCheckedConfig({
+  const config = oryz.createDisableTypeCheckedConfig({
     files: ["**/*.config.js"],
     globals: { MY_GLOBAL: "readonly" }
   });
@@ -47,7 +50,7 @@ test("createDisableTypeCheckedConfig merges files and globals", () => {
 });
 
 test("disableTypeChecked is an alias of createDisableTypeCheckedConfig", () => {
-  assert.equal(disableTypeChecked, createDisableTypeCheckedConfig);
+  assert.equal(oryz.disableTypeChecked, oryz.createDisableTypeCheckedConfig);
 });
 
 test("consumer fixture config can lint JS and TS files", async () => {

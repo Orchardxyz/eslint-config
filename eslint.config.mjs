@@ -1,11 +1,11 @@
 import globals from "globals";
-import { base } from "@oryz/eslint-config";
+import oryz from "@oryz/eslint-config";
 
 export default [
   {
-    ignores: ["node_modules/**", ".pnpm-store/**"]
+    ignores: ["dist/**", "node_modules/**", ".pnpm-store/**"]
   },
-  ...base,
+  ...oryz.base,
   {
     files: ["**/*.js", "**/*.mjs"],
     languageOptions: {
