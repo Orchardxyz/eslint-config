@@ -40,13 +40,14 @@
   "scripts": {
     "build": "tsup",
     "changeset": "changeset",
+    "prelint": "pnpm build",
     "lint": "eslint .",
     "prepack": "pnpm build",
     "pretest": "pnpm build",
     "release": "changeset publish",
     "test": "node --test test/index.test.mjs",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm lint && pnpm typecheck && pnpm test"
+    "check": "pnpm build && eslint . && pnpm typecheck && node --test test/index.test.mjs"
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
