@@ -5,14 +5,27 @@ import type {
   DisableTypeCheckedOptions,
   FlatConfig,
   FlatConfigItem,
-  OryzConfig
+  OryzConfig,
+  OryzOptions
 } from "./types";
 
-const typedLanguageOptions = {
+const defaultAllowDefaultProject = ["*.config.ts"] as const;
+
+const mergeAllowDefaultProject = (allowDefaultProject: string[] = []): string[] =>
+  Array.from(new Set([...defaultAllowDefaultProject, ...allowDefaultProject]));
+
+const createTypedLanguageOptions = (
+  allowDefaultProject: string[]
+): NonNullable<FlatConfig["languageOptions"]> => ({
   parserOptions: {
-    projectService: true
+    projectService: {
+      allowDefaultProject,
+      defaultProject: "tsconfig.json"
+    }
   }
-} satisfies NonNullable<FlatConfig["languageOptions"]>;
+});
+
+const typedLanguageOptions = createTypedLanguageOptions(mergeAllowDefaultProject());
 
 const maxLinesRuleOptions = {
   skipBlankLines: true,
@@ -70,19 +83,6 @@ const sharedTypeScriptRules = {
 
 const base: FlatConfig[] = [js.configs.recommended];
 
-const typed: FlatConfig[] = [
-  ...typeCheckedConfigs,
-  {
-    files: ["**/*.ts", "**/*.tsx"],
-    languageOptions: typedLanguageOptions,
-    rules: sharedTypeScriptRules
-  }
-];
-
-const typescript = typed;
-
-const recommended: FlatConfig[] = [...base, ...typed];
-
 const createDisableTypeCheckedConfig = (
   options: DisableTypeCheckedOptions = {}
 ): FlatConfig => {
@@ -101,11 +101,66 @@ const createDisableTypeCheckedConfig = (
 
 const disableTypeChecked = createDisableTypeCheckedConfig;
 
+const createTypedConfigs = (allowDefaultProject: string[] = []): FlatConfig[] => {
+  const mergedAllowDefaultProject = mergeAllowDefaultProject(allowDefaultProject);
+
+  return [
+    ...typeCheckedConfigs,
+    {
+      files: ["**/*.ts", "**/*.tsx"],
+      languageOptions: createTypedLanguageOptions(mergedAllowDefaultProject),
+      rules: sharedTypeScriptRules
+    },
+    createDisableTypeCheckedConfig({
+      files: mergedAllowDefaultProject
+    })
+  ];
+};
+
+const typed: FlatConfig[] = createTypedConfigs();
+
+const typescript = typed;
+
+const recommended: FlatConfig[] = [...base, ...typed];
+
+const flatConfigKeys = new Set([
+  "name",
+  "files",
+  "ignores",
+  "languageOptions",
+  "linterOptions",
+  "plugins",
+  "processor",
+  "rules",
+  "settings"
+]);
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const hasOwn = (value: Record<string, unknown>, key: string): boolean =>
+  Object.prototype.hasOwnProperty.call(value, key);
+
+const isFlatConfigLike = (value: unknown): value is FlatConfig =>
+  isRecord(value) && Object.keys(value).some((key) => flatConfigKeys.has(key));
+
+const isOryzOptions = (value: unknown): value is OryzOptions =>
+  isRecord(value) && hasOwn(value, "allowDefaultProject") && !isFlatConfigLike(value);
+
 const oryz: OryzConfig = Object.assign(
-  (...configs: FlatConfigItem[]): FlatConfig[] => [
-    ...recommended,
-    ...configs.flatMap((config) => (Array.isArray(config) ? config : [config]))
-  ],
+  (...args: [OryzOptions, ...FlatConfigItem[]] | FlatConfigItem[]): FlatConfig[] => {
+    const [firstArg, ...restArgs] = args;
+    const options = isOryzOptions(firstArg) ? firstArg : void 0;
+    const configs: FlatConfigItem[] = options
+      ? (restArgs as FlatConfigItem[])
+      : (args as FlatConfigItem[]);
+
+    return [
+      ...base,
+      ...(options ? createTypedConfigs(options.allowDefaultProject) : typed),
+      ...configs.flatMap((config) => (Array.isArray(config) ? config : [config]))
+    ];
+  },
   {
     typedLanguageOptions,
     maxLinesRuleOptions,

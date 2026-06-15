@@ -10,7 +10,7 @@ pnpm add -D @oryz/eslint-config eslint typescript
 
 ## Usage
 
-Use the default preset:
+Default preset:
 
 ```js
 // eslint.config.mjs
@@ -19,20 +19,27 @@ import oryz from "@oryz/eslint-config";
 export default oryz();
 ```
 
-Append your own config:
+`oryz()` enables TypeScript project service with a default `allowDefaultProject` of `["*.config.ts"]`. Matching files automatically fall back to the default project and have type-checked rules disabled.
+
+Append extra config or `allowDefaultProject` entries:
 
 ```js
 // eslint.config.mjs
 import oryz from "@oryz/eslint-config";
 
-export default oryz({
-  rules: {
-    "no-console": "off"
+export default oryz(
+  {
+    allowDefaultProject: ["src/browser/index.ts", "src/node/index.ts"]
+  },
+  {
+    rules: {
+      "no-console": "off"
+    }
   }
-});
+);
 ```
 
-Customize the preset:
+Customize the preset manually:
 
 ```js
 // eslint.config.mjs

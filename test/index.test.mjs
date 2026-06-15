@@ -22,7 +22,10 @@ test("exports the expected flat-config building blocks", () => {
   });
   assert.deepEqual(oryz.typedLanguageOptions, {
     parserOptions: {
-      projectService: true
+      projectService: {
+        allowDefaultProject: ["*.config.ts"],
+        defaultProject: "tsconfig.json"
+      }
     }
   });
 });
@@ -36,6 +39,44 @@ test("oryz appends extra configs after the default preset", () => {
 
   assert.deepEqual(oryz(extraConfig), [...oryz.recommended, extraConfig]);
   assert.deepEqual(oryz([extraConfig]), [...oryz.recommended, extraConfig]);
+});
+
+test("oryz keeps legacy flat-config calls compatible when the first arg is a config", () => {
+  const extraConfig = /** @type {import("eslint").Linter.Config} */ ({
+    rules: {
+      "no-console": "off"
+    }
+  });
+
+  assert.deepEqual(oryz(extraConfig), [...oryz.recommended, extraConfig]);
+});
+
+test("oryz merges allowDefaultProject into typed and disableTypeChecked configs", () => {
+  const config = oryz({
+    allowDefaultProject: ["src/browser/index.ts", "src/node/index.ts"]
+  });
+  const mergedAllowDefaultProject = [
+    "*.config.ts",
+    "src/browser/index.ts",
+    "src/node/index.ts"
+  ];
+  const typedConfig = config.find(
+    (item) =>
+      Array.isArray(item.files) &&
+      item.files.includes("**/*.ts") &&
+      item.languageOptions?.parserOptions
+  );
+  const disableConfig = config.at(-1);
+
+  assert.deepEqual(typedConfig?.languageOptions, {
+    parserOptions: {
+      projectService: {
+        allowDefaultProject: mergedAllowDefaultProject,
+        defaultProject: "tsconfig.json"
+      }
+    }
+  });
+  assert.deepEqual(disableConfig?.files, mergedAllowDefaultProject);
 });
 
 test("createDisableTypeCheckedConfig merges files and globals", () => {
@@ -59,7 +100,11 @@ test("consumer fixture config can lint JS and TS files", async () => {
     overrideConfigFile: fixtureConfigPath
   });
 
-  const results = await eslint.lintFiles(["src/example.js", "src/example.ts"]);
+  const results = await eslint.lintFiles([
+    "src/example.js",
+    "src/example.ts",
+    "tsup.config.ts"
+  ]);
   const errors = results.flatMap((result) => result.messages);
 
   assert.deepEqual(errors, []);
