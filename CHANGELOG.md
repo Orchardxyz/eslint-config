@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 1.0.1
+
+### Patch Changes
+
+- [#21](https://github.com/Orchardxyz/eslint-config/pull/21) [`3b77845`](https://github.com/Orchardxyz/eslint-config/commit/3b77845246152a81dfe902a9b8ebff5a656c6a58) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Add `allowDefaultProject` support to `oryz()` so common config files and extra entry files can use the TypeScript default project without parsing errors, while automatically disabling type-checked rules for those matched files.
+
 ## 1.0.0
 
 ### Major Changes
