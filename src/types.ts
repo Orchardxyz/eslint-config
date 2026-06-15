@@ -9,7 +9,12 @@ export interface DisableTypeCheckedOptions {
   globals?: Globals;
 }
 
+export interface OryzOptions {
+  allowDefaultProject?: string[];
+}
+
 export interface OryzConfig {
+  (options: OryzOptions, ...configs: FlatConfigItem[]): FlatConfig[];
   (...configs: FlatConfigItem[]): FlatConfig[];
   readonly typedLanguageOptions: NonNullable<FlatConfig["languageOptions"]>;
   readonly maxLinesRuleOptions: {
