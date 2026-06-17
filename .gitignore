@@ -4,3 +4,5 @@ node_modules
 .npm-cache
 .release-notes.md
 dist
+docs/plans/*
+docs/reviews/*
