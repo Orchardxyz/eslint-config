@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
-
+import { importStyleConfig } from "./plugins/import";
 import type {
   DisableTypeCheckedOptions,
   FlatConfig,
@@ -81,7 +81,7 @@ const sharedTypeScriptRules = {
   "no-void": "error"
 } satisfies NonNullable<FlatConfig["rules"]>;
 
-const base: FlatConfig[] = [js.configs.recommended];
+const base: FlatConfig[] = [js.configs.recommended, importStyleConfig];
 
 const createDisableTypeCheckedConfig = (
   options: DisableTypeCheckedOptions = {}
@@ -150,7 +150,7 @@ const isOryzOptions = (value: unknown): value is OryzOptions =>
 const oryz: OryzConfig = Object.assign(
   (...args: [OryzOptions, ...FlatConfigItem[]] | FlatConfigItem[]): FlatConfig[] => {
     const [firstArg, ...restArgs] = args;
-    const options = isOryzOptions(firstArg) ? firstArg : void 0;
+    const options = isOryzOptions(firstArg) ? firstArg : undefined;
     const configs: FlatConfigItem[] = options
       ? (restArgs as FlatConfigItem[])
       : (args as FlatConfigItem[]);
