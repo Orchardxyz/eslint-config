@@ -5,7 +5,7 @@ export default [
   {
     ignores: ["dist/**", "node_modules/**", ".pnpm-store/**"]
   },
-  ...oryz.base,
+  ...oryz(),
   {
     files: ["**/*.js", "**/*.mjs"],
     languageOptions: {
