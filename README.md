@@ -8,9 +8,7 @@ Reusable ESLint flat config for my projects.
 pnpm add -D @oryz/eslint-config eslint typescript
 ```
 
-## Usage
-
-Default preset:
+## Quick Start
 
 ```js
 // eslint.config.mjs
@@ -19,74 +17,29 @@ import oryz from "@oryz/eslint-config";
 export default oryz();
 ```
 
-`oryz()` enables TypeScript project service with a default `allowDefaultProject` of `["*.config.ts"]`. Matching files automatically fall back to the default project and have type-checked rules disabled.
+`oryz()` returns the default flat config preset. It enables TypeScript project service, includes import ordering rules by default, and uses `["*.config.ts"]` as the built-in `allowDefaultProject` fallback.
+It also sorts `pnpm-workspace.yaml` catalogs by default.
 
-The default preset also enforces import order and spacing:
+## API
 
-- All imports must appear before other statements (`import/first`)
-- Imports are sorted by group (builtin → external → internal → parent → sibling → index → type) and alphabetized (`import/order`)
-- No blank lines between imports (`import/order` with `newlines-between: "never"`)
-- Exactly one blank line after the import block (`import/newline-after-import`)
+| Export | Type | What It Does | Example |
+| --- | --- | --- | --- |
+| `oryz()` | function | Returns the default preset. | `export default oryz()` |
+| `oryz(options, ...configs)` | function | Extends the default preset with extra `allowDefaultProject` entries and appended flat config items. | `oryz({ allowDefaultProject: ["src/browser/index.ts"] }, { rules: { "no-console": "off" } })` |
+| `oryz.pnpmWorkspaceYamlSort` | `FlatConfig` | Standalone `pnpm-workspace.yaml` sorting config via `yaml/sort-keys`. Already included in the default preset, but still available for selective manual composition. | `oryz.pnpmWorkspaceYamlSort` |
+| `oryz.base` | `FlatConfig[]` | Base preset, including JavaScript defaults, import style rules, and `pnpm-workspace.yaml` sorting. | `export default [...oryz.base]` |
+| `oryz.typed` | `FlatConfig[]` | Type-aware TypeScript preset. | `export default [...oryz.base, ...oryz.typed]` |
+| `oryz.typescript` | `FlatConfig[]` | Alias of `oryz.typed`. | `oryz.typescript` |
+| `oryz.recommended` | `FlatConfig[]` | Alias of `oryz()`. | `oryz.recommended` |
+| `oryz.typedLanguageOptions` | `languageOptions` | Shared TypeScript project-service language options. | `languageOptions: oryz.typedLanguageOptions` |
+| `oryz.maxLinesRuleOptions` | object | Shared max-lines rule options with blanks/comments ignored. | `["error", oryz.maxLinesRuleOptions]` |
+| `oryz.createDisableTypeCheckedConfig(options)` | function | Creates a config that disables type-checked rules for matching files. | `oryz.createDisableTypeCheckedConfig({ files: ["scripts/**/*.ts"] })` |
+| `oryz.disableTypeChecked(options)` | function | Alias of `oryz.createDisableTypeCheckedConfig`. | `oryz.disableTypeChecked({ files: ["*.config.ts"] })` |
 
-To override import rules (e.g. to add custom alias groups):
+## Notes
 
-```js
-// eslint.config.mjs
-import oryz from "@oryz/eslint-config";
-
-export default oryz(
-  {
-    rules: {
-      "import/order": [
-        "error",
-        {
-          groups: ["builtin", "external", "internal", "parent", "sibling", "index", "type"],
-          "newlines-between": "never",
-          alphabetize: { order: "asc", caseInsensitive: true },
-          pathGroups: [
-            { pattern: "@/**", group: "internal", position: "before" }
-          ],
-          pathGroupsExcludedImportTypes: ["builtin"]
-        }
-      ]
-    }
-  }
-);
-```
-
-Append extra config or `allowDefaultProject` entries:
-
-```js
-// eslint.config.mjs
-import oryz from "@oryz/eslint-config";
-
-export default oryz(
-  {
-    allowDefaultProject: ["src/browser/index.ts", "src/node/index.ts"]
-  },
-  {
-    rules: {
-      "no-console": "off"
-    }
-  }
-);
-```
-
-Customize the preset manually:
-
-```js
-// eslint.config.mjs
-import oryz from "@oryz/eslint-config";
-
-export default [
-  ...oryz.base,
-  ...oryz.typed,
-  oryz.createDisableTypeCheckedConfig({
-    files: ["scripts/**/*.ts", "*.config.ts"],
-    globals: {
-      console: "readonly",
-      process: "readonly"
-    }
-  })
-];
-```
+| Default Behavior | Details |
+| --- | --- |
+| TypeScript project service | Enabled by default. Matching `allowDefaultProject` files fall back to `tsconfig.json` and have type-checked rules disabled. |
+| Import style | Enforces `import/first`, `import/order`, and `import/newline-after-import`. |
+| `pnpm-workspace.yaml` sorting | Enabled by default for `catalog`, `catalogs`, and `catalogs.<name>` via `yaml/sort-keys`. |

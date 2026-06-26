@@ -8,12 +8,20 @@ import oryz from "@oryz/eslint-config";
 const fixtureDir = fileURLToPath(new URL("./fixtures/consumer/", import.meta.url));
 const fixtureConfigPath = path.join(fixtureDir, "eslint.config.mjs");
 
+const createPnpmWorkspaceEslint = (options = {}) =>
+  new ESLint({
+    cwd: fixtureDir,
+    overrideConfigFile: fixtureConfigPath,
+    ...options
+  });
+
 test("exports the expected flat-config building blocks", () => {
   assert.ok(Array.isArray(oryz.base));
   assert.ok(Array.isArray(oryz.typed));
   assert.equal(oryz.typed, oryz.typescript);
   assert.equal(oryz.recommended.length, oryz.base.length + oryz.typed.length);
   assert.deepEqual(oryz(), oryz.recommended);
+  assert.equal(typeof oryz.pnpmWorkspaceYamlSort, "object");
   assert.deepEqual(oryz.maxLinesRuleOptions, {
     skipBlankLines: true,
     skipComments: true
@@ -106,6 +114,96 @@ test("consumer fixture config can lint JS and TS files", async () => {
   const errors = results.flatMap((result) => result.messages);
 
   assert.deepEqual(errors, []);
+});
+
+test("default preset enables yaml/sort-keys for pnpm-workspace.yaml", async () => {
+  const eslint = createPnpmWorkspaceEslint();
+  const config = await eslint.calculateConfigForFile("pnpm-workspace.yaml");
+
+  assert.equal(config.rules["yaml/sort-keys"][0], 2);
+});
+
+test("pnpm workspace helper remains available for manual composition", async () => {
+  const eslint = new ESLint({
+    cwd: fixtureDir,
+    overrideConfigFile: true,
+    overrideConfig: [oryz.pnpmWorkspaceYamlSort]
+  });
+  const config = await eslint.calculateConfigForFile("pnpm-workspace.yaml");
+
+  assert.equal(config.rules["yaml/sort-keys"][0], 2);
+});
+
+test("default preset reports unsorted top-level catalog keys", async () => {
+  const eslint = createPnpmWorkspaceEslint();
+  const code = ["catalog:", "  zod: ^3.0.0", "  react: ^19.0.0", ""].join("\n");
+  const [result] = await eslint.lintText(code, { filePath: "pnpm-workspace.yaml" });
+
+  assert.ok(result.messages.some((message) => message.ruleId === "yaml/sort-keys"));
+});
+
+test("default preset reports unsorted catalog names", async () => {
+  const eslint = createPnpmWorkspaceEslint();
+  const code = [
+    "catalogs:",
+    "  web:",
+    "    react: ^19.0.0",
+    "  base:",
+    "    eslint: ^10.0.0",
+    ""
+  ].join("\n");
+  const [result] = await eslint.lintText(code, { filePath: "pnpm-workspace.yaml" });
+
+  assert.ok(result.messages.some((message) => message.ruleId === "yaml/sort-keys"));
+});
+
+test("default preset reports unsorted package keys inside named catalogs", async () => {
+  const eslint = createPnpmWorkspaceEslint();
+  const code = [
+    "catalogs:",
+    "  base:",
+    "    zod: ^3.0.0",
+    "    react: ^19.0.0",
+    ""
+  ].join("\n");
+  const [result] = await eslint.lintText(code, { filePath: "pnpm-workspace.yaml" });
+
+  assert.ok(result.messages.some((message) => message.ruleId === "yaml/sort-keys"));
+});
+
+test("default preset fixes representative catalog sorting issues", async () => {
+  const eslint = createPnpmWorkspaceEslint({ fix: true });
+  const code = [
+    "catalog:",
+    "  zod: ^3.0.0",
+    "  react: ^19.0.0",
+    "catalogs:",
+    "  web:",
+    "    zod: ^3.0.0",
+    "    react: ^19.0.0",
+    "  base:",
+    "    typescript: ^6.0.0",
+    "    eslint: ^10.0.0",
+    ""
+  ].join("\n");
+  const [result] = await eslint.lintText(code, { filePath: "pnpm-workspace.yaml" });
+
+  assert.equal(
+    result.output,
+    [
+      "catalog:",
+      "  react: ^19.0.0",
+      "  zod: ^3.0.0",
+      "catalogs:",
+      "  base:",
+      "    eslint: ^10.0.0",
+      "    typescript: ^6.0.0",
+      "  web:",
+      "    react: ^19.0.0",
+      "    zod: ^3.0.0",
+      ""
+    ].join("\n")
+  );
 });
 
 test("type-checked rules are scoped to TypeScript files only", async () => {

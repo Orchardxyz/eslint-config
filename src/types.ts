@@ -25,6 +25,7 @@ export interface OryzConfig {
   readonly typed: FlatConfig[];
   readonly typescript: FlatConfig[];
   readonly recommended: FlatConfig[];
+  readonly pnpmWorkspaceYamlSort: FlatConfig;
   readonly createDisableTypeCheckedConfig: (
     options?: DisableTypeCheckedOptions
   ) => FlatConfig;
