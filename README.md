@@ -18,6 +18,7 @@ export default oryz();
 ```
 
 `oryz()` returns the default flat config preset. It enables TypeScript project service, includes import ordering rules by default, and uses `["*.config.ts"]` as the built-in `allowDefaultProject` fallback.
+It also sorts `pnpm-workspace.yaml` catalogs by default.
 
 ## API
 
@@ -25,8 +26,8 @@ export default oryz();
 | --- | --- | --- | --- |
 | `oryz()` | function | Returns the default preset. | `export default oryz()` |
 | `oryz(options, ...configs)` | function | Extends the default preset with extra `allowDefaultProject` entries and appended flat config items. | `oryz({ allowDefaultProject: ["src/browser/index.ts"] }, { rules: { "no-console": "off" } })` |
-| `oryz.pnpmWorkspaceYamlSort` | `FlatConfig` | Opt-in `pnpm-workspace.yaml` sorting via `yaml/sort-keys`. Sorts `catalog`, `catalogs`, and `catalogs.<name>` keys only. | `oryz(oryz.pnpmWorkspaceYamlSort)` |
-| `oryz.base` | `FlatConfig[]` | Base JavaScript preset plus import style rules. | `export default [...oryz.base]` |
+| `oryz.pnpmWorkspaceYamlSort` | `FlatConfig` | Standalone `pnpm-workspace.yaml` sorting config via `yaml/sort-keys`. Already included in the default preset, but still available for selective manual composition. | `oryz.pnpmWorkspaceYamlSort` |
+| `oryz.base` | `FlatConfig[]` | Base preset, including JavaScript defaults, import style rules, and `pnpm-workspace.yaml` sorting. | `export default [...oryz.base]` |
 | `oryz.typed` | `FlatConfig[]` | Type-aware TypeScript preset. | `export default [...oryz.base, ...oryz.typed]` |
 | `oryz.typescript` | `FlatConfig[]` | Alias of `oryz.typed`. | `oryz.typescript` |
 | `oryz.recommended` | `FlatConfig[]` | Alias of `oryz()`. | `oryz.recommended` |
@@ -41,4 +42,4 @@ export default oryz();
 | --- | --- |
 | TypeScript project service | Enabled by default. Matching `allowDefaultProject` files fall back to `tsconfig.json` and have type-checked rules disabled. |
 | Import style | Enforces `import/first`, `import/order`, and `import/newline-after-import`. |
-| `pnpm-workspace.yaml` sorting | Not enabled unless you explicitly append `oryz.pnpmWorkspaceYamlSort`. |
+| `pnpm-workspace.yaml` sorting | Enabled by default for `catalog`, `catalogs`, and `catalogs.<name>` via `yaml/sort-keys`. |

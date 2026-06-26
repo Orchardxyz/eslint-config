@@ -82,7 +82,11 @@ const sharedTypeScriptRules = {
   "no-void": "error"
 } satisfies NonNullable<FlatConfig["rules"]>;
 
-const base: FlatConfig[] = [js.configs.recommended, importStyleConfig];
+const base: FlatConfig[] = [
+  js.configs.recommended,
+  importStyleConfig,
+  pnpmWorkspaceYamlSortConfig
+];
 
 const createDisableTypeCheckedConfig = (
   options: DisableTypeCheckedOptions = {}

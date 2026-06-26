@@ -7,13 +7,11 @@ import oryz from "@oryz/eslint-config";
 
 const fixtureDir = fileURLToPath(new URL("./fixtures/consumer/", import.meta.url));
 const fixtureConfigPath = path.join(fixtureDir, "eslint.config.mjs");
-const pnpmWorkspaceConfig = oryz(oryz.pnpmWorkspaceYamlSort);
 
 const createPnpmWorkspaceEslint = (options = {}) =>
   new ESLint({
     cwd: fixtureDir,
-    overrideConfigFile: true,
-    overrideConfig: pnpmWorkspaceConfig,
+    overrideConfigFile: fixtureConfigPath,
     ...options
   });
 
@@ -118,14 +116,25 @@ test("consumer fixture config can lint JS and TS files", async () => {
   assert.deepEqual(errors, []);
 });
 
-test("pnpm workspace helper enables yaml/sort-keys for pnpm-workspace.yaml", async () => {
+test("default preset enables yaml/sort-keys for pnpm-workspace.yaml", async () => {
   const eslint = createPnpmWorkspaceEslint();
   const config = await eslint.calculateConfigForFile("pnpm-workspace.yaml");
 
   assert.equal(config.rules["yaml/sort-keys"][0], 2);
 });
 
-test("pnpm workspace helper reports unsorted top-level catalog keys", async () => {
+test("pnpm workspace helper remains available for manual composition", async () => {
+  const eslint = new ESLint({
+    cwd: fixtureDir,
+    overrideConfigFile: true,
+    overrideConfig: [oryz.pnpmWorkspaceYamlSort]
+  });
+  const config = await eslint.calculateConfigForFile("pnpm-workspace.yaml");
+
+  assert.equal(config.rules["yaml/sort-keys"][0], 2);
+});
+
+test("default preset reports unsorted top-level catalog keys", async () => {
   const eslint = createPnpmWorkspaceEslint();
   const code = ["catalog:", "  zod: ^3.0.0", "  react: ^19.0.0", ""].join("\n");
   const [result] = await eslint.lintText(code, { filePath: "pnpm-workspace.yaml" });
@@ -133,7 +142,7 @@ test("pnpm workspace helper reports unsorted top-level catalog keys", async () =
   assert.ok(result.messages.some((message) => message.ruleId === "yaml/sort-keys"));
 });
 
-test("pnpm workspace helper reports unsorted catalog names", async () => {
+test("default preset reports unsorted catalog names", async () => {
   const eslint = createPnpmWorkspaceEslint();
   const code = [
     "catalogs:",
@@ -148,7 +157,7 @@ test("pnpm workspace helper reports unsorted catalog names", async () => {
   assert.ok(result.messages.some((message) => message.ruleId === "yaml/sort-keys"));
 });
 
-test("pnpm workspace helper reports unsorted package keys inside named catalogs", async () => {
+test("default preset reports unsorted package keys inside named catalogs", async () => {
   const eslint = createPnpmWorkspaceEslint();
   const code = [
     "catalogs:",
@@ -162,7 +171,7 @@ test("pnpm workspace helper reports unsorted package keys inside named catalogs"
   assert.ok(result.messages.some((message) => message.ruleId === "yaml/sort-keys"));
 });
 
-test("pnpm workspace helper fixes representative catalog sorting issues", async () => {
+test("default preset fixes representative catalog sorting issues", async () => {
   const eslint = createPnpmWorkspaceEslint({ fix: true });
   const code = [
     "catalog:",

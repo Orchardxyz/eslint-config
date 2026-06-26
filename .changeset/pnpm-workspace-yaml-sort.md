@@ -2,6 +2,6 @@
 "@oryz/eslint-config": minor
 ---
 
-Add an opt-in `oryz.pnpmWorkspaceYamlSort` helper for `pnpm-workspace.yaml`.
+Enable `pnpm-workspace.yaml` catalog sorting in the default preset and keep `oryz.pnpmWorkspaceYamlSort` available for manual composition.
 
-The new helper uses `yaml/sort-keys` to sort catalog names under `catalogs` and package names inside `catalog` and each named catalog without changing the default preset.
+The preset uses `yaml/sort-keys` to sort catalog names under `catalogs` and package names inside `catalog` and each named catalog.
