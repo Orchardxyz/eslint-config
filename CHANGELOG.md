@@ -1,5 +1,54 @@
 # @oryz/eslint-config
 
+## 2.0.0
+
+### Major Changes
+
+- [#23](https://github.com/Orchardxyz/eslint-config/pull/23) [`2483bd3`](https://github.com/Orchardxyz/eslint-config/commit/2483bd3abae8f846011ab1bc4e1d59c952c676ec) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Add `eslint-plugin-import-x` import order and spacing rules to the default preset.
+
+  The default `oryz()` preset now enforces:
+
+  - `import/first` — all imports must appear before other statements
+  - `import/order` — imports sorted by group (builtin → external → internal → parent → sibling → index → type) and alphabetized, with no blank lines between imports
+  - `import/newline-after-import` — exactly one blank line after the import block
+
+  This is a **breaking change**: existing consumers will see new lint errors for files that don't follow these import conventions. Most issues are auto-fixable with `eslint --fix`.
+
+  To customize import rules (e.g. add alias path groups), append an override after `oryz()`:
+
+  ```js
+  export default oryz({
+    rules: {
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            "parent",
+            "sibling",
+            "index",
+            "type",
+          ],
+          "newlines-between": "never",
+          alphabetize: { order: "asc", caseInsensitive: true },
+          pathGroups: [
+            { pattern: "@/**", group: "internal", position: "before" },
+          ],
+          pathGroupsExcludedImportTypes: ["builtin"],
+        },
+      ],
+    },
+  });
+  ```
+
+### Minor Changes
+
+- [#25](https://github.com/Orchardxyz/eslint-config/pull/25) [`440699c`](https://github.com/Orchardxyz/eslint-config/commit/440699cd5b82f655dd71c1cd4cc50acef7b0b828) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Enable `pnpm-workspace.yaml` catalog sorting in the default preset and keep `oryz.pnpmWorkspaceYamlSort` available for manual composition.
+
+  The preset uses `yaml/sort-keys` to sort catalog names under `catalogs` and package names inside `catalog` and each named catalog.
+
 ## 1.0.1
 
 ### Patch Changes
