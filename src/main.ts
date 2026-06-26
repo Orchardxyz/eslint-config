@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import { importStyleConfig } from "./plugins/import";
+import { pnpmWorkspaceYamlSortConfig } from "./plugins/pnpm";
 import type {
   DisableTypeCheckedOptions,
   FlatConfig,
@@ -168,6 +169,7 @@ const oryz: OryzConfig = Object.assign(
     typed,
     typescript,
     recommended,
+    pnpmWorkspaceYamlSort: pnpmWorkspaceYamlSortConfig,
     createDisableTypeCheckedConfig,
     disableTypeChecked
   }
