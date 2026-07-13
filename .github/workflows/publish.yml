@@ -39,9 +39,9 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - name: Upgrade npm
+      - name: Install npm 11
         run: |
-          npm install --global npm@latest
+          npm install --global npm@11
           hash -r
           which node
           node --version
