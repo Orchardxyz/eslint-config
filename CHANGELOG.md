@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 2.1.0
+
+### Minor Changes
+
+- [#26](https://github.com/Orchardxyz/eslint-config/pull/26) [`0219c9c`](https://github.com/Orchardxyz/eslint-config/commit/0219c9c0d7f3f65e5ce1f1a382e21f9a5f37ceda) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Apply import style rules to Vue and Svelte files.
+
 ## 2.0.0
 
 ### Major Changes
