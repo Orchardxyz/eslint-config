@@ -2,7 +2,15 @@ import importPlugin from "eslint-plugin-import-x";
 import type { FlatConfig } from "../types";
 
 const importStyleConfig: FlatConfig = {
-  files: ["**/*.js", "**/*.mjs", "**/*.cjs", "**/*.ts", "**/*.tsx"],
+  files: [
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.vue",
+    "**/*.svelte"
+  ],
   plugins: {
     import: importPlugin
   },
