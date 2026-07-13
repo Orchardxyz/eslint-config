@@ -219,7 +219,7 @@ test("type-checked rules are scoped to TypeScript files only", async () => {
   assert.equal(jsConfig.rules["@typescript-eslint/await-thenable"], void 0);
 });
 
-test("import style rules are enabled for both JS and TS files", async () => {
+test("import style rules are enabled for JS, TS, Vue, and Svelte files", async () => {
   const eslint = new ESLint({
     cwd: fixtureDir,
     overrideConfigFile: fixtureConfigPath
@@ -227,8 +227,10 @@ test("import style rules are enabled for both JS and TS files", async () => {
 
   const tsConfig = await eslint.calculateConfigForFile("src/example.ts");
   const jsConfig = await eslint.calculateConfigForFile("src/example.js");
+  const vueConfig = await eslint.calculateConfigForFile("src/example.vue");
+  const svelteConfig = await eslint.calculateConfigForFile("src/example.svelte");
 
-  for (const config of [tsConfig, jsConfig]) {
+  for (const config of [tsConfig, jsConfig, vueConfig, svelteConfig]) {
     assert.equal(config.rules["import/first"][0], 2);
     assert.equal(config.rules["import/order"][0], 2);
     assert.equal(config.rules["import/newline-after-import"][0], 2);
