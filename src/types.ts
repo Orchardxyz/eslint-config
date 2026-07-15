@@ -11,6 +11,8 @@ export interface DisableTypeCheckedOptions {
 
 export interface OryzOptions {
   allowDefaultProject?: string[];
+  svelte?: boolean;
+  vue?: boolean;
 }
 
 export interface OryzConfig {
