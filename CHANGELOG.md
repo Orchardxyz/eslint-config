@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 2.2.0
+
+### Minor Changes
+
+- [#29](https://github.com/Orchardxyz/eslint-config/pull/29) [`66b5db3`](https://github.com/Orchardxyz/eslint-config/commit/66b5db3287422a622d19d6861a103d9fe5027813) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Add opt-in Vue and Svelte support via `vue` and `svelte` options, including official recommended framework configs and import style rules for matching files.
+
 ## 2.1.0
 
 ### Minor Changes
