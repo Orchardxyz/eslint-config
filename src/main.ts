@@ -1,6 +1,8 @@
 import js from "@eslint/js";
+import sveltePlugin from "eslint-plugin-svelte";
+import vuePlugin from "eslint-plugin-vue";
 import tseslint from "typescript-eslint";
-import { importStyleConfig } from "./plugins/import";
+import { createImportStyleConfig } from "./plugins/import";
 import { pnpmWorkspaceYamlSortConfig } from "./plugins/pnpm";
 import type {
   DisableTypeCheckedOptions,
@@ -11,6 +13,8 @@ import type {
 } from "./types";
 
 const defaultAllowDefaultProject = ["*.config.ts"] as const;
+
+type FrameworkOptions = Pick<OryzOptions, "svelte" | "vue">;
 
 const mergeAllowDefaultProject = (allowDefaultProject: string[] = []): string[] =>
   Array.from(new Set([...defaultAllowDefaultProject, ...allowDefaultProject]));
@@ -82,11 +86,44 @@ const sharedTypeScriptRules = {
   "no-void": "error"
 } satisfies NonNullable<FlatConfig["rules"]>;
 
-const base: FlatConfig[] = [
+const createVueConfigs = (): FlatConfig[] => [
+  ...(vuePlugin.configs["flat/recommended"] as FlatConfig[]),
+  {
+    files: ["**/*.vue"],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser
+      }
+    }
+  }
+];
+
+const createSvelteConfigs = (): FlatConfig[] => [
+  ...(sveltePlugin.configs.recommended as FlatConfig[]),
+  {
+    files: ["**/*.svelte", "**/*.svelte.js", "**/*.svelte.ts"],
+    languageOptions: {
+      parserOptions: {
+        extraFileExtensions: [".svelte"],
+        parser: tseslint.parser
+      }
+    }
+  }
+];
+
+const createFrameworkConfigs = (options: FrameworkOptions = {}): FlatConfig[] => [
+  ...(options.vue ? createVueConfigs() : []),
+  ...(options.svelte ? createSvelteConfigs() : [])
+];
+
+const createBaseConfigs = (options: FrameworkOptions = {}): FlatConfig[] => [
   js.configs.recommended,
-  importStyleConfig,
+  ...createFrameworkConfigs(options),
+  createImportStyleConfig(options),
   pnpmWorkspaceYamlSortConfig
 ];
+
+const base: FlatConfig[] = createBaseConfigs();
 
 const createDisableTypeCheckedConfig = (
   options: DisableTypeCheckedOptions = {}
@@ -128,6 +165,11 @@ const typescript = typed;
 
 const recommended: FlatConfig[] = [...base, ...typed];
 
+const createRecommendedConfigs = (options: OryzOptions = {}): FlatConfig[] => [
+  ...createBaseConfigs(options),
+  ...createTypedConfigs(options.allowDefaultProject)
+];
+
 const flatConfigKeys = new Set([
   "name",
   "files",
@@ -146,11 +188,15 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const hasOwn = (value: Record<string, unknown>, key: string): boolean =>
   Object.prototype.hasOwnProperty.call(value, key);
 
+const oryzOptionKeys = ["allowDefaultProject", "svelte", "vue"] as const;
+
 const isFlatConfigLike = (value: unknown): value is FlatConfig =>
   isRecord(value) && Object.keys(value).some((key) => flatConfigKeys.has(key));
 
 const isOryzOptions = (value: unknown): value is OryzOptions =>
-  isRecord(value) && hasOwn(value, "allowDefaultProject") && !isFlatConfigLike(value);
+  isRecord(value) &&
+  oryzOptionKeys.some((key) => hasOwn(value, key)) &&
+  !isFlatConfigLike(value);
 
 const oryz: OryzConfig = Object.assign(
   (...args: [OryzOptions, ...FlatConfigItem[]] | FlatConfigItem[]): FlatConfig[] => {
@@ -161,8 +207,7 @@ const oryz: OryzConfig = Object.assign(
       : (args as FlatConfigItem[]);
 
     return [
-      ...base,
-      ...(options ? createTypedConfigs(options.allowDefaultProject) : typed),
+      ...(options ? createRecommendedConfigs(options) : recommended),
       ...configs.flatMap((config) => (Array.isArray(config) ? config : [config]))
     ];
   },

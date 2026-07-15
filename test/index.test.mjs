@@ -15,6 +15,25 @@ const createPnpmWorkspaceEslint = (options = {}) =>
     ...options
   });
 
+const createEslintFromConfig = (overrideConfig) =>
+  new ESLint({
+    cwd: fixtureDir,
+    overrideConfig,
+    overrideConfigFile: true
+  });
+
+const assertImportStyleRulesEnabled = (config) => {
+  assert.equal(config.rules["import/first"][0], 2);
+  assert.equal(config.rules["import/order"][0], 2);
+  assert.equal(config.rules["import/newline-after-import"][0], 2);
+};
+
+const assertImportStyleRulesDisabled = (config) => {
+  assert.equal(config?.rules["import/first"], void 0);
+  assert.equal(config?.rules["import/order"], void 0);
+  assert.equal(config?.rules["import/newline-after-import"], void 0);
+};
+
 test("exports the expected flat-config building blocks", () => {
   assert.ok(Array.isArray(oryz.base));
   assert.ok(Array.isArray(oryz.typed));
@@ -219,7 +238,7 @@ test("type-checked rules are scoped to TypeScript files only", async () => {
   assert.equal(jsConfig.rules["@typescript-eslint/await-thenable"], void 0);
 });
 
-test("import style rules are enabled for JS, TS, Vue, and Svelte files", async () => {
+test("import style rules are enabled for JS and TS files by default", async () => {
   const eslint = new ESLint({
     cwd: fixtureDir,
     overrideConfigFile: fixtureConfigPath
@@ -227,14 +246,56 @@ test("import style rules are enabled for JS, TS, Vue, and Svelte files", async (
 
   const tsConfig = await eslint.calculateConfigForFile("src/example.ts");
   const jsConfig = await eslint.calculateConfigForFile("src/example.js");
+
+  for (const config of [tsConfig, jsConfig]) {
+    assertImportStyleRulesEnabled(config);
+  }
+});
+
+test("Vue and Svelte import style rules are disabled by default", async () => {
+  const eslint = new ESLint({
+    cwd: fixtureDir,
+    overrideConfigFile: fixtureConfigPath
+  });
+
   const vueConfig = await eslint.calculateConfigForFile("src/example.vue");
   const svelteConfig = await eslint.calculateConfigForFile("src/example.svelte");
 
-  for (const config of [tsConfig, jsConfig, vueConfig, svelteConfig]) {
-    assert.equal(config.rules["import/first"][0], 2);
-    assert.equal(config.rules["import/order"][0], 2);
-    assert.equal(config.rules["import/newline-after-import"][0], 2);
-  }
+  assertImportStyleRulesDisabled(vueConfig);
+  assertImportStyleRulesDisabled(svelteConfig);
+});
+
+test("Vue option enables Vue recommended and import style rules for Vue files", async () => {
+  const eslint = createEslintFromConfig(oryz({ vue: true }));
+  const vueConfig = await eslint.calculateConfigForFile("src/example.vue");
+  const svelteConfig = await eslint.calculateConfigForFile("src/example.svelte");
+
+  assert.equal(vueConfig.rules["vue/no-parsing-error"][0], 2);
+  assert.equal(vueConfig.rules["vue/no-v-html"][0], 1);
+  assertImportStyleRulesEnabled(vueConfig);
+  assertImportStyleRulesDisabled(svelteConfig);
+});
+
+test("Svelte option enables Svelte recommended and import style rules for Svelte files", async () => {
+  const eslint = createEslintFromConfig(oryz({ svelte: true }));
+  const svelteConfig = await eslint.calculateConfigForFile("src/example.svelte");
+  const vueConfig = await eslint.calculateConfigForFile("src/example.vue");
+
+  assert.equal(svelteConfig.rules["svelte/no-at-html-tags"][0], 2);
+  assert.equal(svelteConfig.rules["svelte/no-at-debug-tags"][0], 1);
+  assertImportStyleRulesEnabled(svelteConfig);
+  assertImportStyleRulesDisabled(vueConfig);
+});
+
+test("Vue and Svelte options can be enabled together", async () => {
+  const eslint = createEslintFromConfig(oryz({ svelte: true, vue: true }));
+  const vueConfig = await eslint.calculateConfigForFile("src/example.vue");
+  const svelteConfig = await eslint.calculateConfigForFile("src/example.svelte");
+
+  assert.equal(vueConfig.rules["vue/no-parsing-error"][0], 2);
+  assert.equal(svelteConfig.rules["svelte/no-at-html-tags"][0], 2);
+  assertImportStyleRulesEnabled(vueConfig);
+  assertImportStyleRulesEnabled(svelteConfig);
 });
 
 test("import/order rule enforces alphabetized ordering with no newlines between groups", async () => {

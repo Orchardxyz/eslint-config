@@ -1,3 +1,9 @@
-import path from "path";
+<script setup lang="ts">
+import path from "node:path";
 
-void path;
+const label = path.sep;
+</script>
+
+<template>
+  <div>{{ label }}</div>
+</template>
