@@ -1,6 +1,5 @@
+import { createRequire } from "node:module";
 import js from "@eslint/js";
-import sveltePlugin from "eslint-plugin-svelte";
-import vuePlugin from "eslint-plugin-vue";
 import tseslint from "typescript-eslint";
 import { createImportStyleConfig } from "./plugins/import";
 import { pnpmWorkspaceYamlSortConfig } from "./plugins/pnpm";
@@ -13,6 +12,7 @@ import type {
 } from "./types";
 
 const defaultAllowDefaultProject = ["*.config.ts"] as const;
+const require = createRequire(import.meta.url);
 
 type FrameworkOptions = Pick<OryzOptions, "svelte" | "vue">;
 
@@ -86,30 +86,52 @@ const sharedTypeScriptRules = {
   "no-void": "error"
 } satisfies NonNullable<FlatConfig["rules"]>;
 
-const createVueConfigs = (): FlatConfig[] => [
-  ...(vuePlugin.configs["flat/recommended"] as FlatConfig[]),
-  {
-    files: ["**/*.vue"],
-    languageOptions: {
-      parserOptions: {
-        parser: tseslint.parser
-      }
-    }
-  }
-];
+const loadPlugin = <Plugin>(name: string): Plugin => {
+  const pluginModule = require(name) as { default?: Plugin } | Plugin;
 
-const createSvelteConfigs = (): FlatConfig[] => [
-  ...(sveltePlugin.configs.recommended as FlatConfig[]),
-  {
-    files: ["**/*.svelte", "**/*.svelte.js", "**/*.svelte.ts"],
-    languageOptions: {
-      parserOptions: {
-        extraFileExtensions: [".svelte"],
-        parser: tseslint.parser
+  return (
+    isRecord(pluginModule) && "default" in pluginModule
+      ? pluginModule.default ?? pluginModule
+      : pluginModule
+  ) as Plugin;
+};
+
+interface FrameworkPlugin {
+  configs: Record<string, FlatConfig | FlatConfig[]>;
+}
+
+const createVueConfigs = (): FlatConfig[] => {
+  const vuePlugin = loadPlugin<FrameworkPlugin>("eslint-plugin-vue");
+
+  return [
+    ...(vuePlugin.configs["flat/recommended"] as FlatConfig[]),
+    {
+      files: ["**/*.vue"],
+      languageOptions: {
+        parserOptions: {
+          parser: tseslint.parser
+        }
       }
     }
-  }
-];
+  ];
+};
+
+const createSvelteConfigs = (): FlatConfig[] => {
+  const sveltePlugin = loadPlugin<FrameworkPlugin>("eslint-plugin-svelte");
+
+  return [
+    ...(sveltePlugin.configs.recommended as FlatConfig[]),
+    {
+      files: ["**/*.svelte", "**/*.svelte.js", "**/*.svelte.ts"],
+      languageOptions: {
+        parserOptions: {
+          extraFileExtensions: [".svelte"],
+          parser: tseslint.parser
+        }
+      }
+    }
+  ];
+};
 
 const createFrameworkConfigs = (options: FrameworkOptions = {}): FlatConfig[] => [
   ...(options.vue ? createVueConfigs() : []),

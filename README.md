@@ -19,7 +19,7 @@ export default oryz();
 
 `oryz()` returns the default flat config preset. It enables TypeScript project service, includes import ordering rules by default, and uses `["*.config.ts"]` as the built-in `allowDefaultProject` fallback.
 It also sorts `pnpm-workspace.yaml` catalogs by default.
-Vue and Svelte file support is opt-in:
+Vue and Svelte file support is opt-in and loaded on demand:
 
 ```js
 // eslint.config.mjs
@@ -50,6 +50,6 @@ export default oryz({ vue: true, svelte: true });
 | --- | --- |
 | TypeScript project service | Enabled by default. Matching `allowDefaultProject` files fall back to `tsconfig.json` and have type-checked rules disabled. |
 | Import style | Enforces `import/first`, `import/order`, and `import/newline-after-import` for JS/TS files by default. Vue and Svelte files are included only when their options are enabled. |
-| Vue support | Disabled by default. Use `oryz({ vue: true })` to enable `eslint-plugin-vue`'s Vue 3 flat recommended config, Vue parser support, and import style rules for `.vue` files. |
-| Svelte support | Disabled by default. Use `oryz({ svelte: true })` to enable `eslint-plugin-svelte`'s recommended config, Svelte parser support, and import style rules for `.svelte` files. |
+| Vue support | Disabled by default. Use `oryz({ vue: true })` to load `eslint-plugin-vue` on demand and enable its Vue 3 flat recommended config, Vue parser support, and import style rules for `.vue` files. |
+| Svelte support | Disabled by default. Use `oryz({ svelte: true })` to load `eslint-plugin-svelte` on demand and enable its recommended config, Svelte parser support, and import style rules for `.svelte` files. Non-Svelte projects do not need to install `svelte`. |
 | `pnpm-workspace.yaml` sorting | Enabled by default for `catalog`, `catalogs`, and `catalogs.<name>` via `yaml/sort-keys`. |
