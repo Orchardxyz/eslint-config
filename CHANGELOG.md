@@ -1,5 +1,11 @@
 # @oryz/eslint-config
 
+## 2.2.1
+
+### Patch Changes
+
+- [#31](https://github.com/Orchardxyz/eslint-config/pull/31) [`cf740e6`](https://github.com/Orchardxyz/eslint-config/commit/cf740e6038621b8f54ad9076eb9c98fc96a7af28) Thanks [@Orchardxyz](https://github.com/Orchardxyz)! - Load Vue and Svelte ESLint plugins only when their framework options are enabled.
+
 ## 2.2.0
 
 ### Minor Changes
