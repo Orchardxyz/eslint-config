@@ -1,12 +1,19 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import { ESLint } from "eslint";
 import oryz from "@oryz/eslint-config";
 
+const execFileAsync = promisify(execFile);
+const repoDir = fileURLToPath(new URL("../", import.meta.url));
 const fixtureDir = fileURLToPath(new URL("./fixtures/consumer/", import.meta.url));
 const fixtureConfigPath = path.join(fixtureDir, "eslint.config.mjs");
+const packageNodeModulesDir = path.join(repoDir, "node_modules");
 
 const createPnpmWorkspaceEslint = (options = {}) =>
   new ESLint({
@@ -32,6 +39,51 @@ const assertImportStyleRulesDisabled = (config) => {
   assert.equal(config?.rules["import/first"], void 0);
   assert.equal(config?.rules["import/order"], void 0);
   assert.equal(config?.rules["import/newline-after-import"], void 0);
+};
+
+const linkDependency = async (consumerNodeModulesDir, packageName) => {
+  const source = path.join(packageNodeModulesDir, packageName);
+  const target = path.join(consumerNodeModulesDir, packageName);
+
+  await mkdir(path.dirname(target), { recursive: true });
+  await symlink(source, target, "dir");
+};
+
+const createMinimalConsumerPackage = async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "oryz-eslint-config-"));
+  const consumerPackageDir = path.join(tempDir, "node_modules", "@oryz", "eslint-config");
+  const consumerNodeModulesDir = path.join(tempDir, "node_modules");
+
+  await mkdir(consumerPackageDir, { recursive: true });
+  await cp(path.join(repoDir, "dist"), path.join(consumerPackageDir, "dist"), {
+    recursive: true
+  });
+  await writeFile(
+    path.join(consumerPackageDir, "package.json"),
+    JSON.stringify({
+      name: "@oryz/eslint-config",
+      type: "module",
+      exports: {
+        ".": {
+          default: "./dist/index.js"
+        }
+      }
+    })
+  );
+
+  for (const packageName of [
+    "@eslint/js",
+    "eslint-plugin-import-x",
+    "eslint-plugin-vue",
+    "eslint-plugin-yml",
+    "typescript-eslint",
+    "vue-eslint-parser",
+    "yaml-eslint-parser"
+  ]) {
+    await linkDependency(consumerNodeModulesDir, packageName);
+  }
+
+  return tempDir;
 };
 
 test("exports the expected flat-config building blocks", () => {
@@ -263,6 +315,31 @@ test("Vue and Svelte import style rules are disabled by default", async () => {
 
   assertImportStyleRulesDisabled(vueConfig);
   assertImportStyleRulesDisabled(svelteConfig);
+});
+
+test("Vue option does not load Svelte packages", async (t) => {
+  const tempDir = await createMinimalConsumerPackage();
+  t.after(async () => {
+    await rm(tempDir, { force: true, recursive: true });
+  });
+
+  const { stdout } = await execFileAsync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "--eval",
+      [
+        'import oryz from "@oryz/eslint-config";',
+        "const configs = oryz({ vue: true });",
+        "const hasVueRule = configs.some((config) => config.rules?.['vue/no-parsing-error']);",
+        "if (!hasVueRule) throw new Error('Vue recommended config was not loaded.');",
+        "console.log('ok');"
+      ].join("\n")
+    ],
+    { cwd: tempDir }
+  );
+
+  assert.equal(stdout.trim(), "ok");
 });
 
 test("Vue option enables Vue recommended and import style rules for Vue files", async () => {
